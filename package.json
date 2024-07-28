@@ -1,0 +1,47 @@
+{
+  "name": "@ziagl/tiled-map-cities",
+  "version": "0.0.1",
+  "description": "A library for data and logic for cities of tiled based games",
+  "author": "Werner Ziegelwanger (ziagl)",
+  "license": "GNU LESSER GENERAL PUBLIC LICENSE",
+  "keywords": [
+    "tiled",
+    "map",
+    "city"
+  ],
+  "files": [
+    "lib",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ziagl/tiled-map-cities.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ziagl/tiled-map-cities/issues"
+  },
+  "homepage": "https://github.com/Ziagl/tiled-map-cities#readme",
+  "main": "lib/main/index.js",
+  "types": "lib/main/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint",
+    "test": "jest",
+    "format": "prettier ./src --write"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "eslint": "^8.57.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.1.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@ziagl/tiled-map-utils": "^0.0.1",
+    "honeycomb-grid": "^4.1.5"
+  }
+}
