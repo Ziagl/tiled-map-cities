@@ -3,6 +3,7 @@ import { CityManager } from '../main';
 const exampleCity = {
   cityId: 0,
   cityPlayer: 1,
+  cityName: 'City1',
   cityPosition: { q: 0, r: 0, s: 0 },
   cityTiles: [{ q: 1, r: 0, s: -1 }, { q: 0, r: 1, s: -1 }],
 };

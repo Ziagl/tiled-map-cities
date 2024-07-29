@@ -4,6 +4,7 @@ export interface ICity {
     // base
     cityId: number;
     cityPlayer: number;
+    cityName: string;
     // position
     cityPosition: CubeCoordinates;
     cityTiles: CubeCoordinates[];
