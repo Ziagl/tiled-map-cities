@@ -35,6 +35,11 @@ export class CityManager {
         this._cityStore = new Map<number, ICity>();
     }
 
+    /**
+     * creates a new city, returns false if not possible
+     * @param city city to create
+     * @returns true if citywas create, false if position is already occupied
+     */
     public createCity(city: ICity): boolean {
         // early exit if layer position is already occupied
         const unitId = Utils.getUnitIdOnPosition(city.cityPosition, this._map!, this._hexDefinition);
