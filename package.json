@@ -1,6 +1,6 @@
 {
   "name": "@ziagl/tiled-map-cities",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A library for data and logic for cities of tiled based games",
   "author": "Werner Ziegelwanger (ziagl)",
   "license": "GNU LESSER GENERAL PUBLIC LICENSE",

@@ -72,6 +72,7 @@ export class CityManager {
       return;
     }
     // compute border lines for each tile
+    const playerCities = this.getCitiesOfPlayer(city.cityPlayer);
     cityTiles.forEach((tile) => {
       const tileBorders = LocalUtils.computeBordersOfTile(tile, tileWidth, tileHeight);
       tileBorders.forEach((tileBorder) => {
@@ -94,6 +95,29 @@ export class CityManager {
             break;
           }
         }
+        // check with list of all other player cities
+        for (let i = 0; i < playerCities.length; ++i) {
+            // skip current city
+            if(playerCities[i]!.cityId == cityId) {
+                continue;
+            }
+            for(let j = 0; j < playerCities[i]!.cityBorders.length; ++j) {
+                if (
+                    ((playerCities[i]!.cityBorders[j]!.start.x === tileBorder.start.x &&
+                      playerCities[i]!.cityBorders[j]!.start.y === tileBorder.start.y &&
+                      playerCities[i]!.cityBorders[j]!.end.x === tileBorder.end.x &&
+                      playerCities[i]!.cityBorders[j]!.end.y === tileBorder.end.y) ||
+                      (playerCities[i]!.cityBorders[j]!.start.x === tileBorder.end.x &&
+                        playerCities[i]!.cityBorders[j]!.start.y === tileBorder.end.y &&
+                        playerCities[i]!.cityBorders[j]!.end.x === tileBorder.start.x &&
+                        playerCities[i]!.cityBorders[j]!.end.y === tileBorder.start.y))
+                  ) {
+                    inList = true;
+                    playerCities[i]!.cityBorders.splice(j, 1);
+                    break;
+                }
+            }
+        }
         // add tile borders if not already in list
         if (!inList) {
           borderLines.push(tileBorder);
@@ -101,6 +125,21 @@ export class CityManager {
       });
     });
     city.cityBorders = borderLines;
+  }
+
+  /**
+   * all cities of given player number
+   * @param playerId player id to search for
+   * @returns array of cities for given player, if no unit was found, empty array
+   */
+  public getCitiesOfPlayer(playerId: number): ICity[] {
+    let cities: ICity[] = [];
+    this._cityStore.forEach((city) => {
+      if (city.cityPlayer === playerId) {
+        cities.push(city);
+      }
+    });
+    return cities;
   }
 
   /**
