@@ -27,7 +27,7 @@ export class CityManager {
         mapArray.push(TileType.EMPTY);
       }
     });
-    this._map = Utils.convertTo2DArray(map, rows, columns);
+    this._map = Utils.convertTo2DArray(mapArray, rows, columns);
     this._map_columns = columns;
 
     // initilize definition to convert offset -> cube coordinates
@@ -45,8 +45,8 @@ export class CityManager {
    */
   public createCity(city: ICity): boolean {
     // early exit if layer position is already occupied
-    const unitId = Utils.getUnitIdOnPosition(city.cityPosition, this._map!, this._hexDefinition);
-    if (unitId != TileType.EMPTY) {
+    const cityId = Utils.getUnitIdOnPosition(city.cityPosition, this._map!, this._hexDefinition);
+    if (cityId != TileType.EMPTY) {
       return false;
     }
     // add city to store
@@ -110,12 +110,12 @@ export class CityManager {
   public print(): string {
     let response: string = '';
     for (let i = 0; i < this._map_columns; ++i) {
-      // @ts-ignore
       const row = this._map[i];
-      // @ts-ignore
-      response += row.join(' ');
-      if (i < this._map_columns - 1) {
-        response += '\n';
+        if(row !== undefined) {
+        response += row.join(' ');
+        if (i < this._map_columns - 1) {
+            response += '\n';
+        }
       }
     }
     return response;

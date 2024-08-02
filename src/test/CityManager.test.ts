@@ -24,7 +24,7 @@ test('createCity', () => {
 test('createCityCollision', () => {
   const exampleMap: number[] = Array(16).fill(0);
   exampleMap[0] = TileType.UNBUILDABLE;
-  const cityManager = new CityManager([...exampleMap], 4, 4, []);
+  const cityManager = new CityManager([...exampleMap], 4, 4, [TileType.UNBUILDABLE]);
   const success = cityManager.createCity(exampleCity);
   expect(success).toBe(false);
 });
