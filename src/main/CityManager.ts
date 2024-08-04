@@ -1,4 +1,4 @@
-import { defineHex, HexOffset, Orientation } from 'honeycomb-grid';
+import { CubeCoordinates, defineHex, HexOffset, Orientation } from 'honeycomb-grid';
 import { ICity } from './interfaces/ICity';
 import { Utils } from '@ziagl/tiled-map-utils';
 import { TileType } from './enums/TileType';
@@ -125,6 +125,122 @@ export class CityManager {
       });
     });
     city.cityBorders = borderLines;
+  }
+
+  /**
+   * adds a new tile to a city, returns false if not possible
+   * @param cityId id of city that should grow
+   * @param tile new tile of city
+   * @returns true if tile was added, false if tile is already part of city or not a valid neighbor
+   */
+  public addCityTile(cityId: number, tile: CubeCoordinates): boolean {
+    const city = this._cityStore.get(cityId);
+    // early exit if city does not exist
+    if (city === undefined) {
+      console.log("city does not exist");
+      return false;
+    }
+    // early exit if tile is city position
+    if(city.cityPosition.q === tile.q && city.cityPosition.r === tile.r && city.cityPosition.s === tile.s) {
+      console.log("tile is city position");
+      return false;
+    }
+    // early exit if tile is already part of city
+    for(let i = 0; i < city.cityTiles.length; ++i) {
+      if(city.cityTiles[i]!.q === tile.q && city.cityTiles[i]!.r === tile.r && city.cityTiles[i]!.s === tile.s) {
+        console.log("tile is already part of city");
+        return false;
+      }
+    }
+    // check if given tile is a valid neighbor of city
+    let validNeighbor = false;
+    for(let i = 0; i < city.cityTiles.length; ++i) {
+      // NE
+      if(city.cityTiles[i]!.q + 1 === tile.q && 
+        city.cityTiles[i]!.r - 1 === tile.r && 
+        city.cityTiles[i]!.s === tile.s) {
+          validNeighbor = true;
+          break;
+      }
+      // E
+      if(city.cityTiles[i]!.q + 1 === tile.q && 
+        city.cityTiles[i]!.r === tile.r && 
+        city.cityTiles[i]!.s - 1 === tile.s) {
+          validNeighbor = true;
+          break;
+      }
+      // SE
+      if(city.cityTiles[i]!.q === tile.q && 
+        city.cityTiles[i]!.r + 1 === tile.r && 
+        city.cityTiles[i]!.s - 1 === tile.s) {
+          validNeighbor = true;
+          break;
+      }
+      // SW
+      if(city.cityTiles[i]!.q - 1 === tile.q && 
+        city.cityTiles[i]!.r + 1 === tile.r && 
+        city.cityTiles[i]!.s === tile.s) {
+          validNeighbor = true;
+          break;
+      }
+      // W
+      if(city.cityTiles[i]!.q - 1 === tile.q && 
+        city.cityTiles[i]!.r === tile.r && 
+        city.cityTiles[i]!.s + 1 === tile.s) {
+          validNeighbor = true;
+          break;
+      }
+      // NW
+      if(city.cityTiles[i]!.q === tile.q && 
+        city.cityTiles[i]!.r - 1 === tile.r && 
+        city.cityTiles[i]!.s + 1 === tile.s) {
+          validNeighbor = true;
+          break;
+      }
+    }
+    if(!validNeighbor) {
+      console.log("tile is not a valid neighbor");
+      return false;
+    }
+    // check if tile is not already occupied by another city
+    validNeighbor = true;
+    const playerCities = this.getCitiesOfPlayer(city.cityPlayer);
+    for (let i = 0; i < playerCities.length; ++i) {
+      // skip current city
+      if(playerCities[i]!.cityId == cityId) {
+        continue;
+      }
+      if(playerCities[i]!.cityPosition.q === tile.q && playerCities[i]!.cityPosition.r === tile.r && playerCities[i]!.cityPosition.s === tile.s) {
+        validNeighbor = false;
+        break;
+      }
+      for(let j = 0; j < playerCities[i]!.cityTiles.length; ++j) {
+        if (
+            ((playerCities[i]!.cityTiles[j]!.q === tile.q &&
+              playerCities[i]!.cityTiles[j]!.r === tile.r &&
+              playerCities[i]!.cityTiles[j]!.s === tile.s))
+          ) {
+            validNeighbor = false;
+            break;
+          }
+      }
+    }
+    if(!validNeighbor) {
+      console.log("tile is already part of another city");
+      return false;
+    }
+    // add tile to city
+    city.cityTiles.push(tile);
+    return true;
+  }
+
+  /**
+   * get city by id
+   * @param cityId id of city
+   * @returns city if found, undefined if not found
+   */
+  public getCityById(cityId: number): ICity | undefined {
+    return this._cityStore.get(cityId);
   }
 
   /**
