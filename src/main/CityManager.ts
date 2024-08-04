@@ -2,9 +2,8 @@ import { CubeCoordinates, defineHex, HexOffset, Orientation } from 'honeycomb-gr
 import { ICity } from './interfaces/ICity';
 import { Utils } from '@ziagl/tiled-map-utils';
 import { TileType } from './enums/TileType';
-import { ILine } from './interfaces/ILine';
-import { IPoint } from './interfaces/IPoint';
 import { Utils as LocalUtils } from './models/Utils';
+import { IPoint } from './interfaces/IPoint';
 
 export class CityManager {
   private _cityStore: Map<number, ICity>;
@@ -58,97 +57,43 @@ export class CityManager {
   }
 
   /**
-   * creates all surrounding border lines of all city tiles and saves result for city object
-   * @param cityId id of city
-   * @param cityTiles city tiles as pixel coordinates
+   * creates all surrounding border lines of all city tiles and saves result for city object for all cities
+   * @param playerId id of player to create borders for
    * @param tileWidth width of tile in pixel
    * @param tileHeight height of tile in pixel
    */
-  public createCityBorders(cityId: number, cityTiles: IPoint[], tileWidth: number, tileHeight: number) {
-    let borderLines: ILine[] = [];
-    const city = this._cityStore.get(cityId);
-    // early exit if city does not exist
-    if (city === undefined) {
-      return;
-    }
-    // compute border lines for each tile
-    const playerCities = this.getCitiesOfPlayer(city.cityPlayer);
-    cityTiles.forEach((tile) => {
-      const tileBorders = LocalUtils.computeBordersOfTile(tile, tileWidth, tileHeight);
-      tileBorders.forEach((tileBorder) => {
-        let inList = false;
-        // if tile borders already in list, remove them
-        for (let i = 0; i < borderLines.length; ++i) {
-          if (
-            borderLines != undefined &&
-            ((borderLines[i]!.start.x === tileBorder.start.x &&
-              borderLines[i]!.start.y === tileBorder.start.y &&
-              borderLines[i]!.end.x === tileBorder.end.x &&
-              borderLines[i]!.end.y === tileBorder.end.y) ||
-              (borderLines[i]!.start.x === tileBorder.end.x &&
-                borderLines[i]!.start.y === tileBorder.end.y &&
-                borderLines[i]!.end.x === tileBorder.start.x &&
-                borderLines[i]!.end.y === tileBorder.start.y))
-          ) {
-            inList = true;
-            borderLines.splice(i, 1);
-            break;
-          }
-        }
-        // check with list of all other player cities
-        for (let i = 0; i < playerCities.length; ++i) {
-            // skip current city
-            if(playerCities[i]!.cityId == cityId) {
-                continue;
-            }
-            for(let j = 0; j < playerCities[i]!.cityBorders.length; ++j) {
-                if (
-                    ((playerCities[i]!.cityBorders[j]!.start.x === tileBorder.start.x &&
-                      playerCities[i]!.cityBorders[j]!.start.y === tileBorder.start.y &&
-                      playerCities[i]!.cityBorders[j]!.end.x === tileBorder.end.x &&
-                      playerCities[i]!.cityBorders[j]!.end.y === tileBorder.end.y) ||
-                      (playerCities[i]!.cityBorders[j]!.start.x === tileBorder.end.x &&
-                        playerCities[i]!.cityBorders[j]!.start.y === tileBorder.end.y &&
-                        playerCities[i]!.cityBorders[j]!.end.x === tileBorder.start.x &&
-                        playerCities[i]!.cityBorders[j]!.end.y === tileBorder.start.y))
-                  ) {
-                    inList = true;
-                    playerCities[i]!.cityBorders.splice(j, 1);
-                    break;
-                }
-            }
-        }
-        // add tile borders if not already in list
-        if (!inList) {
-          borderLines.push(tileBorder);
-        }
-      });
+  public createCityBorders(playerId: number, tileWidth: number, tileHeight: number) {
+    const playerCities = this.getCitiesOfPlayer(playerId);
+    // create all borders for all cities individually
+    playerCities.forEach((city) => {
+      LocalUtils.createBordersForCity(city, tileWidth, tileHeight);
     });
-    city.cityBorders = borderLines;
+    // remove all duplicated borders (overlapping cities)
+    playerCities.forEach((city) => {
+      LocalUtils.removeDuplicatedBorders(city, playerCities);
+    });
   }
 
   /**
    * adds a new tile to a city, returns false if not possible
    * @param cityId id of city that should grow
    * @param tile new tile of city
+   * @param tilePixel pixel position of tile
    * @returns true if tile was added, false if tile is already part of city or not a valid neighbor
    */
-  public addCityTile(cityId: number, tile: CubeCoordinates): boolean {
+  public addCityTile(cityId: number, tile: CubeCoordinates, tilePixel: IPoint): boolean {
     const city = this._cityStore.get(cityId);
     // early exit if city does not exist
     if (city === undefined) {
-      console.log("city does not exist");
       return false;
     }
     // early exit if tile is city position
     if(city.cityPosition.q === tile.q && city.cityPosition.r === tile.r && city.cityPosition.s === tile.s) {
-      console.log("tile is city position");
       return false;
     }
     // early exit if tile is already part of city
     for(let i = 0; i < city.cityTiles.length; ++i) {
       if(city.cityTiles[i]!.q === tile.q && city.cityTiles[i]!.r === tile.r && city.cityTiles[i]!.s === tile.s) {
-        console.log("tile is already part of city");
         return false;
       }
     }
@@ -199,7 +144,6 @@ export class CityManager {
       }
     }
     if(!validNeighbor) {
-      console.log("tile is not a valid neighbor");
       return false;
     }
     // check if tile is not already occupied by another city
@@ -226,11 +170,11 @@ export class CityManager {
       }
     }
     if(!validNeighbor) {
-      console.log("tile is already part of another city");
       return false;
     }
     // add tile to city
     city.cityTiles.push(tile);
+    city.cityTilesPixel.push(tilePixel);
     return true;
   }
 
