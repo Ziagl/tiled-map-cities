@@ -188,3 +188,39 @@ test('createCityBordersMoreCitiesAndAddTile', () => {
   cityManager.createCityBorders(city.cityPlayer, tileWidth, tileHeight);
   expect(city.cityBorders.length + city2.cityBorders.length).toBe(20);
 });
+test('createCityBordersTwoCitiesOneGrowing', () => {
+  const exampleMap: number[] = Array(25).fill(0);
+  const cityManager = new CityManager([...exampleMap], 5, 5, []);
+  const city = createExampleCity();
+  city.cityPosition = { q: -1, r: 0, s: 1 };
+  city.cityTiles = [{ q: 0, r: -1, s: 1 }, { q: 0, r: 0, s: 0 }, { q: -1, r: 1, s: 0 }, { q: -2, r: 1, s: 1 }, { q: -2, r: 0, s: 2 }, { q: -1, r: -1, s: 2 }];
+  city.cityPositionPixel = {x: -34, y: 0};
+  city.cityTilesPixel = [{x: -17, y: -24}, {x: 0, y: 0}, {x: -17, y: 24}, {x: -51, y: 24}, {x: -68, y: 0}, {x: -51, y: -24} ];
+  city.cityBorders = [];
+  let success = cityManager.createCity(city);
+  expect(success).toBe(true);
+  const city2 = createExampleCity();
+  city2.cityName = 'City2';
+  city2.cityPosition = { q: 1, r: 1, s: -2 };
+  city2.cityTiles = [{ q: 2, r: 0, s: -2 }, { q: 2, r: 1, s: -3 }, { q: 1, r: 2, s: -3 }, { q: 0, r: 2, s: -2 }, { q: 0, r: 1, s: -1 }, { q: 1, r: 0, s: -1 }];
+  city2.cityPositionPixel = {x: 51, y: 24};
+  city2.cityTilesPixel = [{x: 68, y: 0}, {x: 85, y: 24}, {x: 68, y: 48}, {x: 34, y: 48}, {x: 17, y: 24}, {x: 34, y: 0}];
+  city2.cityBorders = [];
+  success = cityManager.createCity(city2);
+  expect(success).toBe(true);
+  cityManager.createCityBorders(city.cityPlayer, tileWidth, tileHeight);
+  expect(city.cityBorders.length).toBe(15);
+  expect(city2.cityBorders.length).toBe(15);
+  // add tile to city 1
+  success = cityManager.addCityTile(1, { q: 1, r: -1, s: 0 }, {x: 17, y: -24});
+  expect(success).toBe(true);
+  cityManager.createCityBorders(city.cityPlayer, tileWidth, tileHeight);
+  expect(city.cityBorders.length).toBe(16);
+  expect(city2.cityBorders.length).toBe(14);
+  // add tile to city 1
+  success = cityManager.addCityTile(1, { q: -1, r: 2, s: -1 }, {x: 0, y: 48});
+  expect(success).toBe(true);
+  cityManager.createCityBorders(city.cityPlayer, tileWidth, tileHeight);
+  expect(city.cityBorders.length).toBe(18);
+  expect(city2.cityBorders.length).toBe(12);
+});

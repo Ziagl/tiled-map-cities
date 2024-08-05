@@ -69,9 +69,7 @@ export class CityManager {
       LocalUtils.createBordersForCity(city, tileWidth, tileHeight);
     });
     // remove all duplicated borders (overlapping cities)
-    playerCities.forEach((city) => {
-      LocalUtils.removeDuplicatedBorders(city, playerCities);
-    });
+    LocalUtils.removeDuplicatedBorders(playerCities);
   }
 
   /**

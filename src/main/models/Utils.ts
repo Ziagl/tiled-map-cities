@@ -71,37 +71,49 @@ export class Utils {
     });
     city.cityBorders = borderLines;
   }
-  // removes all duplicated border lines of different cities
-  public static removeDuplicatedBorders(city: ICity, playerCities: ICity[]) {
-    // check with list of all other player cities
-    for (let i = 0; i < playerCities.length; ++i) {
-      // skip current city
-      if(playerCities[i]!.cityId == city.cityId) {
+  // removes all duplicated border lines of all cities
+  public static removeDuplicatedBorders(playerCities: ICity[]) {
+    // create a list of all border lines of all cities
+    let allBorders: {cityId: number, borderLine: ILine}[] = [];
+    playerCities.forEach((city) => {
+      city.cityBorders.forEach((border) => {
+        allBorders.push({cityId: city.cityId, borderLine: border});
+      });
+      city.cityBorders = [];
+    });
+    // find border lines that are unique
+    let uniqueBorders: {cityId: number, borderLine: ILine}[] = [];
+    for(let i = 0; i < allBorders.length; ++i) {
+      let isUnique = true;
+      for(let j = 0; j < allBorders.length; ++j) {
+        if(i == j) {
           continue;
-      }
-      // check all borders of current city against all other borders of all other cities
-      let deletionIndex: number[] = [];
-      for(let j = 0; j < playerCities[i]!.cityBorders.length; ++j) {
-        for(let k=0; k < city.cityBorders.length; ++k) {
-          if (
-              ((playerCities[i]!.cityBorders[j]!.start.x === city.cityBorders[k]!.start.x &&
-                playerCities[i]!.cityBorders[j]!.start.y === city.cityBorders[k]!.start.y &&
-                playerCities[i]!.cityBorders[j]!.end.x === city.cityBorders[k]!.end.x &&
-                playerCities[i]!.cityBorders[j]!.end.y === city.cityBorders[k]!.end.y) ||
-                (playerCities[i]!.cityBorders[j]!.start.x === city.cityBorders[k]!.end.x &&
-                  playerCities[i]!.cityBorders[j]!.start.y === city.cityBorders[k]!.end.y &&
-                  playerCities[i]!.cityBorders[j]!.end.x === city.cityBorders[k]!.start.x &&
-                  playerCities[i]!.cityBorders[j]!.end.y === city.cityBorders[k]!.start.y))
-            ) {
-              city.cityBorders!.splice(k, 1);
-              deletionIndex.push(j);
-              break;
-          }
+        }
+        if(
+          ((allBorders[i]!.borderLine.start.x === allBorders[j]!.borderLine.start.x &&
+            allBorders[i]!.borderLine.start.y === allBorders[j]!.borderLine.start.y &&
+            allBorders[i]!.borderLine.end.x === allBorders[j]!.borderLine.end.x &&
+            allBorders[i]!.borderLine.end.y === allBorders[j]!.borderLine.end.y) ||
+            (allBorders[i]!.borderLine.start.x === allBorders[j]!.borderLine.end.x &&
+              allBorders[i]!.borderLine.start.y === allBorders[j]!.borderLine.end.y &&
+              allBorders[i]!.borderLine.end.x === allBorders[j]!.borderLine.start.x &&
+              allBorders[i]!.borderLine.end.y === allBorders[j]!.borderLine.start.y))
+        ) {
+          isUnique = false;
+          break;
         }
       }
-      for(let j=0; j < deletionIndex.length; ++j) {
-        playerCities[i]!.cityBorders.splice(j, 1);
+      if(isUnique) {
+        uniqueBorders.push(allBorders[i]!);
       }
     }
+    // refill borders of all cities
+    playerCities.forEach((city) => {
+      uniqueBorders.forEach((border) => {
+        if(border.cityId == city.cityId) {
+          city.cityBorders.push(border.borderLine);
+        }
+      });
+    });
   }
 }
